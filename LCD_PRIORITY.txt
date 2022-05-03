@@ -1,0 +1,30 @@
+#include<stdio.h>
+#include"freertos/FreeRTOS.h"
+#include"freertos/timers.h"
+#include"freertos/semphr.h"
+
+SemaphoreHandle_t xSemaphore = NULL;
+
+void vTask1()
+{
+    for (size_t i=0; i<5; i++)
+    {
+        printf("Task1 %d: %lld\n",i,esp_timer_get_time()/1000);
+        vTaskDelay(1000/portTICK_PERIOD_MS);
+    }
+    xSemaphoreGive(xSemaphore);
+    vTaskDelete(NULL);
+}
+
+void app_main(void)
+{
+    xSemaphore = xSemaphoreCreateBinary();
+    printf("\nTimer output in millisecond program initiation: %lld\n\n",esp_timer-get_time()/1000);
+
+    xTaskCreate(vTask1, "Task1",2048,NULL,2,NULL);
+
+    if (xSemaphoreTake(xSemaphore, portMAX_DELAY))
+    {
+        printf("/nProgram completion: %lld\n",esp_timer_get_time()/1000);
+    }
+}
